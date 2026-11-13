@@ -63,18 +63,27 @@ h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
 .tag.ob{border-style:dashed}
 .fab{position:fixed;z-index:850;left:16px;top:16px;font:600 14px var(--body);background:var(--accent);color:var(--surface);border:0;border-radius:999px;padding:9px 16px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .fab[hidden],.tomap[hidden]{display:none}
-.tomap{position:fixed;z-index:850;left:50%;bottom:16px;transform:translateX(-50%);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:7px 18px;font:600 13px var(--body);cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+
+.navbtn{position:fixed;z-index:850;left:50%;bottom:22px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#fff;border:2px solid #fff;border-radius:999px;padding:12px 22px 12px 18px;font:700 15px var(--body);cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.35);transition:transform .15s ease, box-shadow .15s ease}
+.navbtn:hover{transform:translateX(-50%) translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.4)}
+.navbtn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.navbtn .ico{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.22);font-size:16px;line-height:1}
+.navbtn small{font-weight:500;opacity:.85;font-size:12.5px}
+.scrollhint{position:absolute;z-index:800}
+.scrollhint .ico{animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+@media (prefers-reduced-motion:reduce){.scrollhint .ico{animation:none}}
+.btn.back{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border-color:var(--accent);padding:8px 16px;font-size:14px;cursor:pointer;font-family:inherit}
+.btn.back:hover{filter:brightness(1.08)}
 .tlhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .tlhead h2{margin:0}
 .btn.sm{padding:5px 12px;font-size:13px;background:transparent;cursor:pointer;font-family:inherit}
 @media (min-width:701px){
   .ov.top{position:fixed}
   .fab{display:none!important}
-  body.scrolled .titlecard h1, body.scrolled .titlecard .sub{display:none}
-  body.scrolled .titlecard{display:flex;flex-wrap:wrap;align-items:center;gap:8px;max-width:calc(100vw - 32px);padding:8px 10px}
-  body.scrolled .titlecard .chip{padding:5px 11px;font-size:13px}
-  body.scrolled .titlecard .listbtn{padding:6px 12px;font-size:13px}
-  .wrap{padding-top:96px}
+  body.mini #map{position:fixed;inset:auto 16px 16px auto;width:min(460px,40vw);height:320px;z-index:860;border-radius:12px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.3);overflow:hidden}
+  body.mini .basesel, body.mini .leaflet-control-scale{display:none}
+  body.mini .mlabel:not(.sel){display:none}
 }
 .listbtn{justify-self:start;font:600 14px var(--body);background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
 .listbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
@@ -83,7 +92,7 @@ h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
 .lph{display:flex;align-items:center;justify-content:space-between;padding-right:10px}
 .lph .x{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:18px;cursor:pointer}
 .listpanel .list{flex:1;max-height:none}
-.scrollhint{cursor:pointer;position:absolute;z-index:800;left:50%;bottom:14px;transform:translateX(-50%);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 16px;font:600 13px var(--body);text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+
 .mapbox{position:relative;overflow:hidden}
 .legend{position:absolute;right:56px;bottom:22px;display:flex;flex-wrap:wrap;gap:6px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -161,7 +170,7 @@ dialog.dlg::backdrop{background:rgba(10,15,25,.55)}
 .src{font-size:12.5px;word-break:break-all}
 .src a{color:var(--accent)}
 .hide{display:none!important}
-@media (max-width:700px){.fab{top:auto;bottom:16px}.tomap{left:auto;right:16px;transform:none}.ov.top{right:12px}.titlecard{max-width:none}.legend{display:none}.listpanel{left:8px;right:8px;width:auto;top:auto;bottom:56px;height:60%}.scrollhint{bottom:10px}}
+@media (max-width:700px){.fab{top:auto;bottom:16px}.tomap{left:auto;right:16px;transform:none}.tomap:hover{transform:translateY(-2px)}.navbtn{padding:10px 16px 10px 12px;font-size:14px}.navbtn small{display:none}.ov.top{right:12px}.titlecard{max-width:none}.legend{display:none}.listpanel{left:8px;right:8px;width:auto;top:auto;bottom:56px;height:60%}.scrollhint{bottom:14px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -190,14 +199,14 @@ dialog.dlg::backdrop{background:rgba(10,15,25,.55)}
   </aside>
 
   <div class="legend" id="legend"></div>
-  <button type="button" class="scrollhint" id="scrollhint">Časová osa ↓</button>
+  <button type="button" class="navbtn scrollhint" id="scrollhint"><span class="ico" aria-hidden="true">↓</span>Časová osa <small>kdy se co koná</small></button>
 </section>
 <button type="button" class="fab" id="fab" hidden aria-controls="listpanel">☰ Seznam akcí</button>
-<button type="button" class="tomap" id="tomap" hidden>Mapa ↑</button>
+<button type="button" class="navbtn tomap" id="tomap" hidden><span class="ico" aria-hidden="true">↑</span>Zpět na mapu</button>
 
 <div class="wrap">
   <section class="panel tl" id="casova-osa">
-    <div class="tlhead"><h2>Časová osa</h2><button type="button" class="btn sm" id="tomap2">↑ Zpět na mapu</button></div>
+    <div class="tlhead"><h2>Časová osa</h2><button type="button" class="btn back" id="tomap2"><span aria-hidden="true">↑</span> Zpět na mapu</button></div>
     <div class="tlgrid"><div class="tlinner" id="tl"></div></div>
     <div class="tlleg"><span><i class="dot" style="background:var(--muted);border-radius:3px;width:18px;height:10px"></i>termín akce</span><span><i style="width:10px;height:10px;border:2px solid var(--muted);transform:rotate(45deg)"></i>uzávěrka přihlášek</span><span><i style="width:0;height:12px;border-left:2px solid var(--warn)"></i>dnes</span></div>
   </section>
@@ -403,9 +412,24 @@ function applySel(){
     if (el){ el.classList.toggle("sel", on); labels[id].setZIndexOffset(on ? 1000 : 0); }
   }
 }
+let savedView = null;
+function fitAll(){
+  if (!map) return;
+  const pts = visible().map(e => [e.lat, e.lng]);
+  if (!pts.length) return;
+  map.fitBounds(L.latLngBounds(pts), {padding:[28,28], maxZoom:6, animate:true});
+}
+function setMini(on){
+  if (!map || on === document.body.classList.contains("mini")) return;
+  if (on) savedView = {c: map.getCenter(), z: map.getZoom()};
+  document.body.classList.toggle("mini", on);
+  map.invalidateSize();
+  if (on) fitAll();
+  else if (savedView) map.setView(savedView.c, savedView.z, {animate:false});
+}
 function focusEv(id){
   selectedId = id; applySel();
-  if (map && markers[id]) zoomTo(id);
+  if (map && markers[id] && !document.body.classList.contains("mini")) zoomTo(id);
 }
 
 function renderLegend(){
@@ -487,6 +511,7 @@ function renderTimeline(){
 }
 
 function renderAll(){
+  setTimeout(() => { if (document.body.classList.contains("mini")) fitAll(); }, 0);
   const vis = visible();
   const lc = document.getElementById("listcount"); if (lc) lc.textContent = `(${vis.length})`;
   if (!vis.some(e=>e.id===selectedId)) selectedId = (vis.find(e=>e.dl>=TODAY) || vis[0] || {}).id || null;
@@ -499,7 +524,12 @@ document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () =
 }));
 try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch(e){}
 window.scrollTo(0,0);
-document.getElementById("scrollhint").addEventListener("click", () => document.getElementById("casova-osa").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}));
+document.getElementById("scrollhint").addEventListener("click", () => {
+  const sec = document.getElementById("casova-osa");
+  const card = document.querySelector(".titlecard");
+  const off = innerWidth > 700 ? card.offsetHeight + 40 : 12;
+  window.scrollTo({top: sec.getBoundingClientRect().top + scrollY - off, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+});
 initMap(); renderLegend(); renderAll();
 const lp = document.getElementById("listpanel"), lb = document.getElementById("listbtn");
 const fab = document.getElementById("fab");
@@ -517,14 +547,15 @@ function setList(open){
 }
 lb.addEventListener("click", () => setList(lp.hidden));
 fab.addEventListener("click", () => setList(lp.hidden));
-const goMap = () => { window.scrollTo({top:0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}); if (map) setTimeout(() => { map.invalidateSize(); if (selectedId && markers[selectedId]) zoomTo(selectedId); }, 400); };
+const goMap = () => { window.scrollTo({top:0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}); if (map) setTimeout(() => { if (!document.body.classList.contains("mini") && selectedId && markers[selectedId]) zoomTo(selectedId); }, 700); };
 document.getElementById("tomap").addEventListener("click", goMap);
 document.getElementById("tomap2").addEventListener("click", goMap);
 function onScroll(){
   const heroBottom = document.querySelector(".hero").getBoundingClientRect().bottom;
   fab.hidden = heroBottom > 120;
   const sc = heroBottom < innerHeight * 0.6;
-  if (sc !== document.body.classList.contains("scrolled")){ document.body.classList.toggle("scrolled", sc); if (!lp.hidden) placePanel(); updatePad(); }
+  if (sc !== document.body.classList.contains("scrolled")){ document.body.classList.toggle("scrolled", sc); if (!lp.hidden) placePanel(); }
+  setMini(sc && innerWidth > 700);
   document.getElementById("tomap").hidden = heroBottom > 120;
   if (!lp.hidden) placePanel();
 }
