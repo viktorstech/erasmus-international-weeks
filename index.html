@@ -39,7 +39,7 @@
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--body)}
-.wrap{transition:padding-left .25s ease;max-width:1280px;margin:0 auto;padding:24px 20px 40px;display:grid;gap:20px}
+.wrap{max-width:1280px;margin:0 auto;padding:24px 20px 40px;display:grid;gap:20px}
 header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
 h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance}
 .sub{color:var(--muted);margin:4px 0 0;max-width:62ch}
@@ -71,8 +71,10 @@ h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
   .ov.top{position:fixed}
   .fab{display:none!important}
   body.scrolled .titlecard h1, body.scrolled .titlecard .sub{display:none}
-  body.scrolled .titlecard{max-width:400px}
-  body.scrolled .wrap, body.lp-open .wrap{max-width:none;margin:0}
+  body.scrolled .titlecard{display:flex;flex-wrap:wrap;align-items:center;gap:8px;max-width:calc(100vw - 32px);padding:8px 10px}
+  body.scrolled .titlecard .chip{padding:5px 11px;font-size:13px}
+  body.scrolled .titlecard .listbtn{padding:6px 12px;font-size:13px}
+  .wrap{padding-top:96px}
 }
 .listbtn{justify-self:start;font:600 14px var(--body);background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
 .listbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
@@ -382,7 +384,7 @@ function renderList(){
   });
 }
 let selectedId = null, labels = {};
-const FOCUS_ZOOM = 11;
+const FOCUS_ZOOM = 7;
 function zoomTo(id){
   const ll = markers[id].getLatLng();
   const z = Math.max(map.getZoom(), FOCUS_ZOOM);
@@ -505,14 +507,7 @@ function placePanel(){
   if (innerWidth > 700){ const r = document.querySelector(".titlecard").getBoundingClientRect(); lp.style.top = Math.max(16, r.bottom + 8) + "px"; }
   else lp.style.top = "";
 }
-function updatePad(){
-  const w = document.querySelector(".wrap");
-  if (innerWidth <= 700 || !(document.body.classList.contains("scrolled") || !lp.hidden)){ w.style.paddingLeft = ""; return; }
-  let right = 0;
-  const card = document.querySelector(".titlecard"); if (document.body.classList.contains("scrolled")) right = card.getBoundingClientRect().right;
-  if (!lp.hidden) right = Math.max(right, lp.getBoundingClientRect().right);
-  w.style.paddingLeft = Math.max(20, Math.round(right + 24)) + "px";
-}
+function updatePad(){}
 function setList(open){
   lp.hidden = !open; lb.setAttribute("aria-expanded", String(open)); fab.setAttribute("aria-expanded", String(open));
   document.body.classList.toggle("lp-open", open);
