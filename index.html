@@ -57,6 +57,10 @@ h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
 .titlecard{pointer-events:auto;display:inline-grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:0 4px 16px rgba(0,0,0,.18);max-width:560px}
 .titlecard h1{font-size:clamp(20px,2.4vw,26px)}
 .titlecard .sub{margin:0;font-size:13px}
+.basesel{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px 8px 14px;box-shadow:0 4px 16px rgba(0,0,0,.18);font:500 13px var(--body);color:var(--muted)}
+.leaflet-touch .basesel, .basesel.leaflet-bar{border:1px solid var(--line)}
+.basesel select{font:600 14px var(--body);padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer}
+.basesel select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .oborrow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
 .oborrow select{font:500 13px var(--body);padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer;max-width:100%}
 .oborrow select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
@@ -139,9 +143,6 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch}
 .mlabel.sel span{opacity:1;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 .mlabel:hover span{opacity:.9}
 .leaflet-container{font-family:var(--body);background:var(--land)}
-.basesel{display:flex;align-items:center;gap:8px;background:#fff;padding:6px 8px 6px 10px;font:500 13px var(--body);color:#152033}
-.basesel select{font:500 13px var(--body);padding:4px 26px 4px 8px;border:1px solid #c4ccd8;border-radius:6px;background:#fff;color:#152033;cursor:pointer}
-.basesel select:focus-visible{outline:2px solid #1f4fd1;outline-offset:1px}
 .legend{z-index:800}
 dialog.dlg{z-index:2000}
 .ev .more{background:none;border:0;padding:0;cursor:pointer;font-family:inherit;font-size:13px;color:var(--accent);font-weight:600;margin-right:12px}
@@ -470,7 +471,7 @@ function initMap(){
   let start = "Mapa"; try { const s = localStorage.getItem("eiw-base"); if (s && layers[s]) start = s; } catch(e){}
   let current = layers[start].addTo(map);
   const Sel = L.Control.extend({ options:{position:"topright"}, onAdd(){
-    const box = L.DomUtil.create("div","basesel leaflet-bar");
+    const box = L.DomUtil.create("div","basesel");
     box.innerHTML = `<label for="base-select">Podklad</label><select id="base-select">${Object.keys(layers).map(k=>`<option value="${k}"${k===start?" selected":""}>${k}</option>`).join("")}</select>`;
     L.DomEvent.disableClickPropagation(box); L.DomEvent.disableScrollPropagation(box);
     box.querySelector("select").addEventListener("change", ev => {
