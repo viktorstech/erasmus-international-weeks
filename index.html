@@ -39,7 +39,7 @@
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--body)}
-.wrap{max-width:1280px;margin:0 auto;padding:24px 20px 40px;display:grid;gap:20px}
+.wrap{transition:padding-left .25s ease;max-width:1280px;margin:0 auto;padding:24px 20px 40px;display:grid;gap:20px}
 header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
 h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance}
 .sub{color:var(--muted);margin:4px 0 0;max-width:62ch}
@@ -72,7 +72,7 @@ h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
   .fab{display:none!important}
   body.scrolled .titlecard h1, body.scrolled .titlecard .sub{display:none}
   body.scrolled .titlecard{max-width:400px}
-  body.scrolled .wrap, body.lp-open .wrap{padding-left:436px;max-width:none;margin:0}
+  body.scrolled .wrap, body.lp-open .wrap{max-width:none;margin:0}
 }
 .listbtn{justify-self:start;font:600 14px var(--body);background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
 .listbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
@@ -104,7 +104,7 @@ h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
 .tl h2,.listh{font:700 18px var(--display);margin:0 0 10px}
 .listh{padding:12px 12px 0}
 .tlgrid{position:relative;overflow-x:auto}
-.tlinner{min-width:760px;position:relative}
+.tlinner{min-width:560px;position:relative}
 .months{display:grid;grid-template-columns:200px 1fr;font-size:12px;color:var(--muted)}
 .mrow{position:relative;height:20px}
 .mrow span{position:absolute;top:0;transform:translateX(2px)}
@@ -382,6 +382,14 @@ function renderList(){
   });
 }
 let selectedId = null, labels = {};
+const FOCUS_ZOOM = 11;
+function zoomTo(id){
+  const ll = markers[id].getLatLng();
+  const z = Math.max(map.getZoom(), FOCUS_ZOOM);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || map.getCenter().distanceTo(ll) < 2000 && map.getZoom() === z) map.setView(ll, z, {animate:!reduce});
+  else map.flyTo(ll, z, {duration:1.2});
+}
 function applySel(){
   document.querySelectorAll(".ev,.row[data-id]").forEach(x=>x.classList.toggle("on",x.dataset.id===selectedId));
   for (const id in markers){
@@ -395,7 +403,7 @@ function applySel(){
 }
 function focusEv(id){
   selectedId = id; applySel();
-  if (map && markers[id]) map.panTo(markers[id].getLatLng());
+  if (map && markers[id]) zoomTo(id);
 }
 
 function renderLegend(){
@@ -497,22 +505,31 @@ function placePanel(){
   if (innerWidth > 700){ const r = document.querySelector(".titlecard").getBoundingClientRect(); lp.style.top = Math.max(16, r.bottom + 8) + "px"; }
   else lp.style.top = "";
 }
+function updatePad(){
+  const w = document.querySelector(".wrap");
+  if (innerWidth <= 700 || !(document.body.classList.contains("scrolled") || !lp.hidden)){ w.style.paddingLeft = ""; return; }
+  let right = 0;
+  const card = document.querySelector(".titlecard"); if (document.body.classList.contains("scrolled")) right = card.getBoundingClientRect().right;
+  if (!lp.hidden) right = Math.max(right, lp.getBoundingClientRect().right);
+  w.style.paddingLeft = Math.max(20, Math.round(right + 24)) + "px";
+}
 function setList(open){
   lp.hidden = !open; lb.setAttribute("aria-expanded", String(open)); fab.setAttribute("aria-expanded", String(open));
   document.body.classList.toggle("lp-open", open);
   fab.textContent = open ? "× Zavřít seznam" : "☰ Seznam akcí";
   if (open){ placePanel(); const s=document.querySelector(".ev.on"); if(s) s.scrollIntoView({block:"nearest"}); }
+  updatePad();
 }
 lb.addEventListener("click", () => setList(lp.hidden));
 fab.addEventListener("click", () => setList(lp.hidden));
-const goMap = () => { window.scrollTo({top:0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}); if (map) setTimeout(() => { map.invalidateSize(); if (selectedId && markers[selectedId]) map.panTo(markers[selectedId].getLatLng()); }, 400); };
+const goMap = () => { window.scrollTo({top:0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}); if (map) setTimeout(() => { map.invalidateSize(); if (selectedId && markers[selectedId]) zoomTo(selectedId); }, 400); };
 document.getElementById("tomap").addEventListener("click", goMap);
 document.getElementById("tomap2").addEventListener("click", goMap);
 function onScroll(){
   const heroBottom = document.querySelector(".hero").getBoundingClientRect().bottom;
   fab.hidden = heroBottom > 120;
   const sc = heroBottom < innerHeight * 0.6;
-  if (sc !== document.body.classList.contains("scrolled")){ document.body.classList.toggle("scrolled", sc); if (!lp.hidden) placePanel(); }
+  if (sc !== document.body.classList.contains("scrolled")){ document.body.classList.toggle("scrolled", sc); if (!lp.hidden) placePanel(); updatePad(); }
   document.getElementById("tomap").hidden = heroBottom > 120;
   if (!lp.hidden) placePanel();
 }
@@ -530,7 +547,7 @@ document.getElementById("tl").addEventListener("keydown", ev => {
   ev.preventDefault(); const id = row.dataset.id; if (selectedId === id) openDetail(id); else focusEv(id);
 });
 document.getElementById("listclose").addEventListener("click", () => setList(false));
-window.addEventListener("resize", () => { if (!lp.hidden) placePanel(); });
+window.addEventListener("resize", () => { if (!lp.hidden) placePanel(); updatePad(); });
 
 const rethemed = () => renderMap();
 
