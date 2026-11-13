@@ -89,7 +89,9 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch}
 .dlg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .mlabel span{display:inline-block;white-space:nowrap;font:600 12px var(--body);background:#fff;color:#152033;border:1px solid #c4ccd8;border-left-width:4px;border-radius:4px;padding:1px 6px;box-shadow:0 1px 3px rgba(0,0,0,.25);cursor:pointer}
 .leaflet-container{font-family:var(--body);background:var(--land)}
-.leaflet-control-layers{font-size:13px}
+.basesel{display:flex;align-items:center;gap:8px;background:#fff;padding:6px 8px 6px 10px;font:500 13px var(--body);color:#152033}
+.basesel select{font:500 13px var(--body);padding:4px 26px 4px 8px;border:1px solid #c4ccd8;border-radius:6px;background:#fff;color:#152033;cursor:pointer}
+.basesel select:focus-visible{outline:2px solid #1f4fd1;outline-offset:1px}
 .legend{z-index:500}
 dialog.dlg{z-index:2000}
 .ev .more{font-size:13px;color:var(--accent);font-weight:600;margin-right:12px}
@@ -156,7 +158,7 @@ dialog.dlg::backdrop{background:rgba(10,15,25,.55)}
 
   <dialog class="dlg" id="dlg" aria-labelledby="dlg-title"><div id="dlg-body"></div></dialog>
 
-  <footer>Mapové podklady: OpenStreetMap, Esri (World Imagery, Light/Dark Gray Canvas), OpenTopoMap. Zdroje dat: oficiální stránky univerzit a databáze IMOTION (staffmobility.eu); detail a ověření ke každé akci je ve vaultu „Erasmus International Weeks“. „Částečně ověřeno“ znamená, že část údajů pochází z IMOTION nebo ze stránky partnerské univerzity. Souřadnice jsou přibližné. Před přihlášením si uzávěrku vždy ověřte u pořadatele.</footer>
+  <footer>Mapové podklady: OpenStreetMap, Esri (World Imagery, Light/Dark Gray Canvas). Zdroje dat: oficiální stránky univerzit a databáze IMOTION (staffmobility.eu); detail a ověření ke každé akci je ve vaultu „Erasmus International Weeks“. „Částečně ověřeno“ znamená, že část údajů pochází z IMOTION nebo ze stránky partnerské univerzity. Souřadnice jsou přibližné. Před přihlášením si uzávěrku vždy ověřte u pořadatele.</footer>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -349,7 +351,6 @@ const carto = style => L.tileLayer(`https://basemaps.cartocdn.com/rastertiles/${
 const BASES = {
   "Mapa": () => L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}),
   "Satelit": () => L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:'Tiles &copy; Esri, Maxar, Earthstar Geographics'}),
-  "Terén": () => L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:'&copy; OpenStreetMap, SRTM | &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'}),
   "Světlá": () => CARTO_KEY ? carto("light_all") : esriCanvas("Light"),
   "Tmavá": () => CARTO_KEY ? carto("dark_all") : esriCanvas("Dark")
 };
@@ -359,10 +360,19 @@ function initMap(){
   map = L.map(el, {zoomControl:true, worldCopyJump:true}).fitBounds([[35,-11],[63.5,31]]);
   const layers = {}; for (const k in BASES) layers[k] = BASES[k]();
   let start = "Mapa"; try { const s = localStorage.getItem("eiw-base"); if (s && layers[s]) start = s; } catch(e){}
-  layers[start].addTo(map);
-  L.control.layers(layers, null, {position:"topright", collapsed:false}).addTo(map);
+  let current = layers[start].addTo(map);
+  const Sel = L.Control.extend({ options:{position:"topright"}, onAdd(){
+    const box = L.DomUtil.create("div","basesel leaflet-bar");
+    box.innerHTML = `<label for="base-select">Podklad</label><select id="base-select">${Object.keys(layers).map(k=>`<option value="${k}"${k===start?" selected":""}>${k}</option>`).join("")}</select>`;
+    L.DomEvent.disableClickPropagation(box); L.DomEvent.disableScrollPropagation(box);
+    box.querySelector("select").addEventListener("change", ev => {
+      const k = ev.target.value; map.removeLayer(current); current = layers[k].addTo(map);
+      try { localStorage.setItem("eiw-base", k); } catch(e){}
+    });
+    return box;
+  }});
+  new Sel().addTo(map);
   L.control.scale({imperial:false}).addTo(map);
-  map.on("baselayerchange", ev => { try { localStorage.setItem("eiw-base", ev.name); } catch(e){} });
   layerGroup = L.layerGroup().addTo(map);
 }
 function renderMap(){
