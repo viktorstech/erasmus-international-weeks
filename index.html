@@ -81,7 +81,7 @@ h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
 @media (min-width:701px){
   .ov.top{position:fixed}
   .fab{display:none!important}
-  body.mini #map{position:fixed;inset:auto 16px 16px auto;width:min(460px,40vw);height:320px;z-index:860;border-radius:12px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.3);overflow:hidden}
+  body.mini #map{position:fixed;inset:calc(env(safe-area-inset-top, 0px) + 16px) 16px auto auto;width:min(460px,40vw);height:320px;z-index:860;border-radius:12px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.3);overflow:hidden}
   body.mini .basesel, body.mini .leaflet-control-scale{display:none}
   body.mini .mlabel:not(.sel){display:none}
 }
