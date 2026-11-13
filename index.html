@@ -96,7 +96,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch}
 .basesel select:focus-visible{outline:2px solid #1f4fd1;outline-offset:1px}
 .legend{z-index:500}
 dialog.dlg{z-index:2000}
-.ev .more{font-size:13px;color:var(--accent);font-weight:600;margin-right:12px}
+.ev .more{background:none;border:0;padding:0;cursor:pointer;font-family:inherit;font-size:13px;color:var(--accent);font-weight:600;margin-right:12px}
 dialog.dlg{border:1px solid var(--line);border-radius:14px;padding:0;max-width:720px;width:calc(100% - 32px);background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
 dialog.dlg::backdrop{background:rgba(10,15,25,.55)}
 .dlg .hd{padding:20px 22px 14px;border-left:6px solid var(--c);display:grid;gap:4px;position:relative}
@@ -321,12 +321,16 @@ function renderList(){
           <span class="tag">${e.fee}</span>
           <span class="tag ${e.st==="ověřeno"?"ok":"part"}">${e.st}</span>
         </div>
-        <span class="more">Zobrazit detail →</span><a href="${e.url}" target="_blank" rel="noopener">Stránka akce ↗</a>
+        <button type="button" class="more">Zobrazit detail →</button><a href="${e.url}" target="_blank" rel="noopener">Stránka akce ↗</a>
       </div>
     </div>`).join("");
   L.querySelectorAll(".ev").forEach(el => {
-    const go = () => openDetail(el.dataset.id);
-    el.addEventListener("click", ev => { if (ev.target.tagName !== "A") go(); });
+    const go = () => { const id = el.dataset.id; if (selectedId === id) openDetail(id); else focusEv(id); };
+    el.addEventListener("click", ev => {
+      if (ev.target.tagName === "A") return;
+      if (ev.target.closest(".more")) { openDetail(el.dataset.id); return; }
+      go();
+    });
     el.addEventListener("keydown", ev => { if (ev.key==="Enter"||ev.key===" "){ev.preventDefault();go();} });
   });
 }
@@ -396,9 +400,13 @@ function renderMap(){
     const col = mcolV(e);
     const m = L.circleMarker([e.lat,e.lng], {radius:9, color:"#ffffff", weight:2, fillColor:col, fillOpacity:1});
     const second = e.od2 ? `<br>2. edice: ${fmt(e.od2,e.do2)}` : "";
-    m.bindTooltip(`<b>${esc(e.uni)}</b><br>${fmt(e.od,e.do)} ${d(e.od).getFullYear()}${second}<br>přihláška do ${fmt1(e.dl)}`, {direction:"top", offset:[0,-8]});
+    m.bindTooltip(() => `<b>${esc(e.uni)}</b><br>${fmt(e.od,e.do)} ${d(e.od).getFullYear()}${second}<br>přihláška do ${fmt1(e.dl)}<br><i>${selectedId===e.id?"klikněte pro detail":"klikněte pro výběr, znovu pro detail"}</i>`, {direction:"top", offset:[0,-8]});
     const lbl = L.marker([e.lat,e.lng], {interactive:true, keyboard:false, icon: L.divIcon({className:"mlabel", html:`<span style="border-color:${col}">${fmt(e.od,e.do)}</span>`, iconSize:null, iconAnchor: e.id==="hsel" ? [86,10] : [-12,10]})});
-    const open = () => { const li=document.querySelector(`.ev[data-id="${e.id}"]`); if(li) li.scrollIntoView({block:"nearest",behavior:"smooth"}); openDetail(e.id); };
+    const open = () => {
+      if (selectedId === e.id) { openDetail(e.id); return; }
+      focusEv(e.id);
+      const li=document.querySelector(`.ev[data-id="${e.id}"]`); if(li) li.scrollIntoView({block:"nearest",behavior:"smooth"});
+    };
     m.on("click", open); lbl.on("click", open);
     layerGroup.addLayer(m); layerGroup.addLayer(lbl);
     markers[e.id] = m; labels[e.id] = lbl;
