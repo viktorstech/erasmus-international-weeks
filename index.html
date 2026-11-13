@@ -57,9 +57,20 @@ h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
 .titlecard{pointer-events:auto;display:inline-grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:0 4px 16px rgba(0,0,0,.18);max-width:560px}
 .titlecard h1{font-size:clamp(20px,2.4vw,26px)}
 .titlecard .sub{margin:0;font-size:13px}
+.oborrow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.oborrow select{font:500 13px var(--body);padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer;max-width:100%}
+.oborrow select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.tag.ob{border-style:dashed}
+.fab{position:fixed;z-index:850;left:16px;top:16px;font:600 14px var(--body);background:var(--accent);color:var(--surface);border:0;border-radius:999px;padding:9px 16px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.fab[hidden],.tomap[hidden]{display:none}
+.tomap{position:fixed;z-index:850;left:50%;bottom:16px;transform:translateX(-50%);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:7px 18px;font:600 13px var(--body);cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.tlhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.tlhead h2{margin:0}
+.btn.sm{padding:5px 12px;font-size:13px;background:transparent;cursor:pointer;font-family:inherit}
+body.lp-open .wrap{padding-left:max(20px, 436px)}
 .listbtn{justify-self:start;font:600 14px var(--body);background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
 .listbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.listpanel{position:absolute;z-index:900;left:12px;top:200px;bottom:60px;width:400px;max-width:calc(100% - 24px);display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.listpanel{position:fixed;z-index:900;left:12px;top:200px;bottom:16px;width:400px;max-width:calc(100% - 24px);display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 .listpanel[hidden]{display:none}
 .lph{display:flex;align-items:center;justify-content:space-between;padding-right:10px}
 .lph .x{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:18px;cursor:pointer}
@@ -91,6 +102,10 @@ h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
 .months{display:grid;grid-template-columns:200px 1fr;font-size:12px;color:var(--muted)}
 .mrow{position:relative;height:20px}
 .mrow span{position:absolute;top:0;transform:translateX(2px)}
+.row[data-id]{cursor:pointer}
+.row[data-id]:hover{background:var(--paper)}
+.row.on{background:var(--paper);box-shadow:inset 4px 0 0 var(--c)}
+.row.on .lbl{font-weight:700}
 .row{display:grid;grid-template-columns:200px 1fr;align-items:center;min-height:30px;border-top:1px solid var(--line)}
 .row .lbl{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px}
 .track{position:relative;height:30px}
@@ -138,7 +153,8 @@ dialog.dlg::backdrop{background:rgba(10,15,25,.55)}
 .src{font-size:12.5px;word-break:break-all}
 .src a{color:var(--accent)}
 .hide{display:none!important}
-@media (max-width:700px){.ov.top{right:12px}.titlecard{max-width:none}.legend{display:none}.listpanel{left:8px;right:8px;width:auto;top:auto;bottom:56px;height:60%}.scrollhint{bottom:10px}}
+@media (max-width:1100px){body.lp-open .wrap{padding-left:20px}}
+@media (max-width:700px){.fab{top:auto;bottom:16px}.tomap{left:auto;right:16px;transform:none}.ov.top{right:12px}.titlecard{max-width:none}.legend{display:none}.listpanel{left:8px;right:8px;width:auto;top:auto;bottom:56px;height:60%}.scrollhint{bottom:10px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -156,6 +172,7 @@ dialog.dlg::backdrop{background:rgba(10,15,25,.55)}
         <button class="chip" id="f-training" data-f="training" aria-pressed="false">Chci se školit</button>
         <button class="chip" id="f-studying" data-f="studying" aria-pressed="false">Chci studovat</button>
       </div>
+      <div class="oborrow"><label for="obor-select">Obor</label><select id="obor-select"><option value="all">Všechny obory</option></select></div>
       <button class="listbtn" id="listbtn" aria-expanded="false" aria-controls="listpanel">☰ Seznam akcí <span id="listcount"></span></button>
     </div>
   </div>
@@ -168,10 +185,12 @@ dialog.dlg::backdrop{background:rgba(10,15,25,.55)}
   <div class="legend" id="legend"></div>
   <button type="button" class="scrollhint" id="scrollhint">Časová osa ↓</button>
 </section>
+<button type="button" class="fab" id="fab" hidden aria-controls="listpanel">☰ Seznam akcí</button>
+<button type="button" class="tomap" id="tomap" hidden>Mapa ↑</button>
 
 <div class="wrap">
   <section class="panel tl" id="casova-osa">
-    <h2>Časová osa</h2>
+    <div class="tlhead"><h2>Časová osa</h2><button type="button" class="btn sm" id="tomap2">↑ Zpět na mapu</button></div>
     <div class="tlgrid"><div class="tlinner" id="tl"></div></div>
     <div class="tlleg"><span><i class="dot" style="background:var(--muted);border-radius:3px;width:18px;height:10px"></i>termín akce</span><span><i style="width:10px;height:10px;border:2px solid var(--muted);transform:rotate(45deg)"></i>uzávěrka přihlášek</span><span><i style="width:0;height:12px;border-left:2px solid var(--warn)"></i>dnes</span></div>
   </section>
@@ -304,6 +323,9 @@ function openDetail(id){
   focusEv(id);
 }
 document.getElementById("dlg").addEventListener("click", ev => { if (ev.target.id === "dlg") ev.target.close(); });
+const OBORY = {zdravi:"Zdravotnictví a sociální práce", pedag:"Pedagogika a vzdělávání", design:"Design a umění", human:"Humanitní a sociální vědy", tech:"Technika", ekon:"Ekonomie a právo", intl:"Správa VŠ a internacionalizace"};
+const OB = {hamk:["zdravi","pedag"], via:["pedag","zdravi"], fhj:["design"], uma:["intl"], ug:["intl","ekon"], vmu:["human","intl"], hsel:["tech","ekon","intl"], kdg:["zdravi","pedag"], ips:["intl"], ubm:["human","intl"]};
+let obor = "all";
 const MON = ["led","úno","bře","dub","kvě","čvn","čvc","srp","zář","říj","lis","pro"];
 const MONFULL = {2:"únor",3:"březen",4:"duben",5:"květen",6:"červen"};
 const MOBCZ = {teaching:"učit",training:"školit se",studying:"studovat"};
@@ -323,10 +345,11 @@ function dlTag(e){
   const cls = n <= 30 ? "tag dl soon" : "tag dl";
   return `<span class="${cls}">přihláška do ${fmt1(e.dl)} · ${n} dní${note}</span>`;
 }
-function visible(){ return EV.filter(e => filter==="all" || e.mob.includes(filter)); }
+function visible(){ return EV.filter(e => (filter==="all" || e.mob.includes(filter)) && (obor==="all" || (OB[e.id]||[]).includes(obor))); }
 
 function renderList(){
   const L = document.getElementById("list");
+  if (!visible().length){ L.innerHTML = `<p style="padding:12px;color:var(--muted)">Žádná akce neodpovídá filtrům.</p>`; return; }
   L.innerHTML = visible().map(e => `
     <div class="ev" tabindex="0" data-id="${e.id}" style="--c:${mcol(e)}">
       <div class="date">${fmt(e.od,e.do)}<small>${d(e.od).getFullYear()}</small></div>
@@ -336,6 +359,7 @@ function renderList(){
         <div class="tags">
           ${e.mob.map(m=>`<span class="tag">${MOBCZ[m]}</span>`).join("")}
           ${dlTag(e)}
+          ${(OB[e.id]||[]).map(o=>`<span class="tag ob">${OBORY[o]}</span>`).join("")}
           <span class="tag">${e.fee}</span>
           <span class="tag ${e.st==="ověřeno"?"ok":"part"}">${e.st}</span>
         </div>
@@ -354,7 +378,7 @@ function renderList(){
 }
 let selectedId = null, labels = {};
 function applySel(){
-  document.querySelectorAll(".ev").forEach(x=>x.classList.toggle("on",x.dataset.id===selectedId));
+  document.querySelectorAll(".ev,.row[data-id]").forEach(x=>x.classList.toggle("on",x.dataset.id===selectedId));
   for (const id in markers){
     const on = id === selectedId;
     markers[id].setStyle(on ? {radius:13, opacity:1, fillOpacity:1, weight:3} : {radius:9, opacity:0.55, fillOpacity:0.35, weight:2});
@@ -442,7 +466,7 @@ function renderTimeline(){
   h += `<div class="row" style="border-top:0;min-height:18px"><div></div><div class="track" style="height:18px">${grid}<span class="todaylbl" style="left:${pos(TODAY)}%">dnes 13. 11.</span></div></div>`;
   h += visible().map(e => {
     const bars = `<div class="bar" title="${fmt(e.od,e.do)}" style="left:${pos(e.od)}%;width:${pos(e.do)-pos(e.od)}%"></div>` + (e.od2?`<div class="bar" title="${fmt(e.od2,e.do2)}" style="left:${pos(e.od2)}%;width:${pos(e.do2)-pos(e.od2)}%"></div>`:"");
-    return `<div class="row" style="--c:${mcol(e)}"><div class="lbl" title="${e.uni}">${e.uni}</div><div class="track">${grid}${bars}<div class="dlm" title="uzávěrka ${fmt1(e.dl)}" style="left:${pos(e.dl)}%"></div></div></div>`;
+    return `<div class="row${e.id===selectedId?" on":""}" data-id="${e.id}" tabindex="0" style="--c:${mcol(e)}"><div class="lbl" title="${e.uni}">${e.uni}</div><div class="track">${grid}${bars}<div class="dlm" title="uzávěrka ${fmt1(e.dl)}" style="left:${pos(e.dl)}%"></div></div></div>`;
   }).join("");
   document.getElementById("tl").innerHTML = h;
 }
@@ -463,9 +487,41 @@ window.scrollTo(0,0);
 document.getElementById("scrollhint").addEventListener("click", () => document.getElementById("casova-osa").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}));
 initMap(); renderLegend(); renderAll();
 const lp = document.getElementById("listpanel"), lb = document.getElementById("listbtn");
-function placePanel(){ if (innerWidth > 700){ const r = document.querySelector(".titlecard").getBoundingClientRect(); lp.style.top = (r.bottom - document.querySelector(".hero").getBoundingClientRect().top + 8) + "px"; } else lp.style.top = ""; }
-function setList(open){ lp.hidden = !open; lb.setAttribute("aria-expanded", String(open)); if (open){ placePanel(); const s=document.querySelector(".ev.on"); if(s) s.scrollIntoView({block:"nearest"}); } }
+const fab = document.getElementById("fab");
+function placePanel(){
+  if (innerWidth > 700){ const r = document.querySelector(".titlecard").getBoundingClientRect(); lp.style.top = Math.max(16, r.bottom + 8) + "px"; }
+  else lp.style.top = "";
+}
+function setList(open){
+  lp.hidden = !open; lb.setAttribute("aria-expanded", String(open)); fab.setAttribute("aria-expanded", String(open));
+  document.body.classList.toggle("lp-open", open);
+  fab.textContent = open ? "× Zavřít seznam" : "☰ Seznam akcí";
+  if (open){ placePanel(); const s=document.querySelector(".ev.on"); if(s) s.scrollIntoView({block:"nearest"}); }
+}
 lb.addEventListener("click", () => setList(lp.hidden));
+fab.addEventListener("click", () => setList(lp.hidden));
+const goMap = () => { window.scrollTo({top:0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}); if (map) setTimeout(() => { map.invalidateSize(); if (selectedId && markers[selectedId]) map.panTo(markers[selectedId].getLatLng()); }, 400); };
+document.getElementById("tomap").addEventListener("click", goMap);
+document.getElementById("tomap2").addEventListener("click", goMap);
+function onScroll(){
+  const heroBottom = document.querySelector(".hero").getBoundingClientRect().bottom;
+  fab.hidden = heroBottom > 120;
+  document.getElementById("tomap").hidden = heroBottom > 120;
+  if (!lp.hidden) placePanel();
+}
+window.addEventListener("scroll", onScroll, {passive:true});
+onScroll();
+const os = document.getElementById("obor-select");
+os.innerHTML += Object.entries(OBORY).filter(([k]) => EV.some(e => (OB[e.id]||[]).includes(k))).map(([k,v]) => `<option value="${k}">${v} (${EV.filter(e=>(OB[e.id]||[]).includes(k)).length})</option>`).join("");
+os.addEventListener("change", () => { obor = os.value; renderAll(); });
+document.getElementById("tl").addEventListener("click", ev => {
+  const row = ev.target.closest(".row[data-id]"); if (!row) return;
+  const id = row.dataset.id; if (selectedId === id) openDetail(id); else focusEv(id);
+});
+document.getElementById("tl").addEventListener("keydown", ev => {
+  const row = ev.target.closest(".row[data-id]"); if (!row || (ev.key!=="Enter" && ev.key!==" ")) return;
+  ev.preventDefault(); const id = row.dataset.id; if (selectedId === id) openDetail(id); else focusEv(id);
+});
 document.getElementById("listclose").addEventListener("click", () => setList(false));
 window.addEventListener("resize", () => { if (!lp.hidden) placePanel(); });
 
