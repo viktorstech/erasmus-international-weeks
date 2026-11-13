@@ -61,6 +61,21 @@ h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
 .leaflet-touch .basesel, .basesel.leaflet-bar{border:1px solid var(--line)}
 .basesel select{font:600 14px var(--body);padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer}
 .basesel select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.more{font-size:13px}
+.more summary{cursor:pointer;color:var(--accent);font-weight:600;list-style:none;display:inline-flex;align-items:center;gap:6px;padding:2px 0}
+.more summary::-webkit-details-marker{display:none}
+.more summary::before{content:"▸";transition:transform .15s}
+.more[open] summary::before{transform:rotate(90deg)}
+.more summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.fcount{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--accent);color:var(--surface);font-size:12px}
+.fcount[hidden]{display:none}
+.fgrid{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin-top:8px;color:var(--muted)}
+.fgrid select{font:500 13px var(--body);padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer;min-width:0}
+.fgrid select:focus-visible,.chk input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.chk{display:flex;align-items:center;gap:8px;color:var(--ink);cursor:pointer}
+.chk input{accent-color:var(--accent);width:16px;height:16px}
+.reset{margin-top:10px;font:600 13px var(--body);background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:5px 12px;cursor:pointer}
+.reset:hover{color:var(--ink)}
 .oborrow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
 .oborrow select{font:500 13px var(--body);padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer;max-width:100%}
 .oborrow select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
@@ -190,6 +205,19 @@ dialog.dlg::backdrop{background:rgba(10,15,25,.55)}
         <button class="chip" id="f-studying" data-f="studying" aria-pressed="false">Chci studovat</button>
       </div>
       <div class="oborrow"><label for="obor-select">Obor</label><select id="obor-select"><option value="all">Všechny obory</option></select></div>
+      <details class="more" id="more">
+        <summary>Další filtry <span class="fcount" id="fcount" hidden></span></summary>
+        <div class="fgrid">
+          <label for="f-zeme">Země</label><select id="f-zeme"><option value="all">Všechny země</option></select>
+          <label for="f-fee">Poplatek</label><select id="f-fee">
+            <option value="all">Jakýkoli</option><option value="free">Zdarma</option><option value="low">Do 200 €</option><option value="high">Nad 200 €</option><option value="na">Neuvedeno</option></select>
+          <label for="f-dl">Přihlášky</label><select id="f-dl">
+            <option value="all">Všechny</option><option value="open">Ještě otevřené</option><option value="soon">Uzávěrka do 30 dní</option></select>
+          <label for="f-mes">Konání</label><select id="f-mes"><option value="all">Kdykoli</option></select>
+          <span></span><label class="chk"><input type="checkbox" id="f-ver"> Jen plně ověřené údaje</label>
+        </div>
+        <button type="button" class="reset" id="f-reset">Zrušit všechny filtry</button>
+      </details>
       <button class="listbtn" id="listbtn" aria-expanded="false" aria-controls="listpanel">☰ Seznam akcí <span id="listcount"></span></button>
     </div>
   </div>
@@ -343,6 +371,15 @@ document.getElementById("dlg").addEventListener("click", ev => { if (ev.target.i
 const OBORY = {zdravi:"Zdravotnictví a sociální práce", pedag:"Pedagogika a vzdělávání", design:"Design a umění", human:"Humanitní a sociální vědy", tech:"Technika", ekon:"Ekonomie a právo", intl:"Správa VŠ a internacionalizace"};
 const OB = {hamk:["zdravi","pedag"], via:["pedag","zdravi"], fhj:["design"], uma:["intl"], ug:["intl","ekon"], vmu:["human","intl"], hsel:["tech","ekon","intl"], kdg:["zdravi","pedag"], ips:["intl"], ubm:["human","intl"]};
 let obor = "all";
+const FEE = {hamk:150, via:0, fhj:null, uma:250, ug:350, vmu:200, hsel:0, kdg:0, ips:150, ubm:300}; // nejvyšší uvedený poplatek v €, null = neuvedeno
+const X = {zeme:"all", fee:"all", dl:"all", mes:"all", ver:false};
+const MESNAZ = ["leden","únor","březen","duben","květen","červen","červenec","srpen","září","říjen","listopad","prosinec"];
+const months = e => { const m = [d(e.od).getMonth()]; if (e.od2) m.push(d(e.od2).getMonth()); return m; };
+function feeOk(e){ const f = FEE[e.id];
+  if (X.fee==="all") return true; if (X.fee==="na") return f==null; if (f==null) return false;
+  return X.fee==="free" ? f===0 : X.fee==="low" ? f>0 && f<=200 : f>200; }
+function dlOk(e){ const n = dayDiff(TODAY, e.dl);
+  return X.dl==="all" || (X.dl==="open" && n>=0) || (X.dl==="soon" && n>=0 && n<=30); }
 const MON = ["led","úno","bře","dub","kvě","čvn","čvc","srp","zář","říj","lis","pro"];
 const MONFULL = {2:"únor",3:"březen",4:"duben",5:"květen",6:"červen"};
 const MOBCZ = {teaching:"učit",training:"školit se",studying:"studovat"};
@@ -362,7 +399,8 @@ function dlTag(e){
   const cls = n <= 30 ? "tag dl soon" : "tag dl";
   return `<span class="${cls}">přihláška do ${fmt1(e.dl)} · ${n} dní${note}</span>`;
 }
-function visible(){ return EV.filter(e => (filter==="all" || e.mob.includes(filter)) && (obor==="all" || (OB[e.id]||[]).includes(obor))); }
+function visible(){ return EV.filter(e => (filter==="all" || e.mob.includes(filter)) && (obor==="all" || (OB[e.id]||[]).includes(obor))
+  && (X.zeme==="all" || e.cc===X.zeme) && feeOk(e) && dlOk(e) && (X.mes==="all" || months(e).includes(+X.mes)) && (!X.ver || e.st==="ověřeno")); }
 
 function renderList(){
   const L = document.getElementById("list");
@@ -573,7 +611,24 @@ window.addEventListener("scroll", onScroll, {passive:true});
 onScroll();
 const os = document.getElementById("obor-select");
 os.innerHTML += Object.entries(OBORY).filter(([k]) => EV.some(e => (OB[e.id]||[]).includes(k))).map(([k,v]) => `<option value="${k}">${v} (${EV.filter(e=>(OB[e.id]||[]).includes(k)).length})</option>`).join("");
-os.addEventListener("change", () => { obor = os.value; renderAll(); });
+os.addEventListener("change", () => { obor = os.value; renderAll(); updCount(); });
+const $ = id => document.getElementById(id);
+[...new Set(EV.map(e=>e.cc))].sort((a,b)=>a.localeCompare(b,"cs")).forEach(c => $("f-zeme").insertAdjacentHTML("beforeend", `<option value="${c}">${c}</option>`));
+[...new Set(EV.flatMap(months))].sort((a,b)=>a-b).forEach(m => $("f-mes").insertAdjacentHTML("beforeend", `<option value="${m}">${MESNAZ[m]} ${m>=10?2026:2027}</option>`));
+function updCount(){
+  const n = ["zeme","fee","dl","mes"].filter(k=>X[k]!=="all").length + (X.ver?1:0);
+  $("fcount").hidden = !n; $("fcount").textContent = n;
+}
+[["f-zeme","zeme"],["f-fee","fee"],["f-dl","dl"],["f-mes","mes"]].forEach(([id,k]) => $(id).addEventListener("change", ev => { X[k] = ev.target.value; renderAll(); updCount(); }));
+$("f-ver").addEventListener("change", ev => { X.ver = ev.target.checked; renderAll(); updCount(); });
+$("f-reset").addEventListener("click", () => {
+  Object.assign(X, {zeme:"all", fee:"all", dl:"all", mes:"all", ver:false});
+  ["f-zeme","f-fee","f-dl","f-mes"].forEach(id => $(id).value = "all"); $("f-ver").checked = false;
+  obor = "all"; os.value = "all"; filter = "all";
+  document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.f==="all")));
+  renderAll(); updCount();
+});
+$("more").addEventListener("toggle", () => { if (!lp.hidden) placePanel(); });
 document.getElementById("tl").addEventListener("click", ev => {
   const row = ev.target.closest(".row[data-id]"); if (!row) return;
   const id = row.dataset.id; if (selectedId === id) openDetail(id); else focusEv(id);
