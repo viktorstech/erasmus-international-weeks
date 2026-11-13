@@ -48,9 +48,23 @@ h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
 .chip:focus-visible,.ev:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:20px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px}
-#map{height:560px;width:100%}
+.hero{position:relative;height:100vh;height:100svh;min-height:520px}
+#map{position:absolute;inset:0}
+.ov{position:absolute;z-index:800;pointer-events:none}
+.ov.top{top:12px;left:12px;right:200px}
+.titlecard{pointer-events:auto;display:inline-grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:0 4px 16px rgba(0,0,0,.18);max-width:560px}
+.titlecard h1{font-size:clamp(20px,2.4vw,26px)}
+.titlecard .sub{margin:0;font-size:13px}
+.listbtn{justify-self:start;font:600 14px var(--body);background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+.listbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.listpanel{position:absolute;z-index:900;left:12px;top:200px;bottom:60px;width:400px;max-width:calc(100% - 24px);display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.listpanel[hidden]{display:none}
+.lph{display:flex;align-items:center;justify-content:space-between;padding-right:10px}
+.lph .x{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:18px;cursor:pointer}
+.listpanel .list{flex:1;max-height:none}
+.scrollhint{position:absolute;z-index:800;left:50%;bottom:14px;transform:translateX(-50%);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 16px;font:600 13px var(--body);text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .mapbox{position:relative;overflow:hidden}
-.legend{position:absolute;left:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:6px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;color:var(--muted)}
+.legend{position:absolute;right:56px;bottom:22px;display:flex;flex-wrap:wrap;gap:6px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
 .list{max-height:560px;overflow-y:auto;padding:8px}
@@ -94,7 +108,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch}
 .basesel{display:flex;align-items:center;gap:8px;background:#fff;padding:6px 8px 6px 10px;font:500 13px var(--body);color:#152033}
 .basesel select{font:500 13px var(--body);padding:4px 26px 4px 8px;border:1px solid #c4ccd8;border-radius:6px;background:#fff;color:#152033;cursor:pointer}
 .basesel select:focus-visible{outline:2px solid #1f4fd1;outline-offset:1px}
-.legend{z-index:500}
+.legend{z-index:800}
 dialog.dlg{z-index:2000}
 .ev .more{background:none;border:0;padding:0;cursor:pointer;font-family:inherit;font-size:13px;color:var(--accent);font-weight:600;margin-right:12px}
 dialog.dlg{border:1px solid var(--line);border-radius:14px;padding:0;max-width:720px;width:calc(100% - 32px);background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
@@ -122,37 +136,39 @@ dialog.dlg::backdrop{background:rgba(10,15,25,.55)}
 .src{font-size:12.5px;word-break:break-all}
 .src a{color:var(--accent)}
 .hide{display:none!important}
-@media (max-width:900px){.main{grid-template-columns:1fr}#map{height:420px}.list{max-height:none}}
+@media (max-width:700px){.ov.top{right:12px}.titlecard{max-width:none}.legend{display:none}.listpanel{left:8px;right:8px;width:auto;top:auto;bottom:56px;height:60%}.scrollhint{bottom:10px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div>
-      <h1>Erasmus International Weeks 2027</h1>
-      <p class="sub">10 univerzit, 10 zemí. Kde a kdy se konají International / Staff Weeks a do kdy se hlásit. Údaje k 13. 11. 2026.</p>
-    </div>
-    <div class="chips" role="group" aria-label="Filtr podle typu mobility">
-      <button class="chip" id="f-all" data-f="all" aria-pressed="true">Vše</button>
-      <button class="chip" id="f-teaching" data-f="teaching" aria-pressed="false">Chci učit</button>
-      <button class="chip" id="f-training" data-f="training" aria-pressed="false">Chci se školit</button>
-      <button class="chip" id="f-studying" data-f="studying" aria-pressed="false">Chci studovat</button>
-    </div>
-  </header>
+<section class="hero" aria-label="Mapa akcí">
+  <div id="map" role="img" aria-label="Mapa Evropy s univerzitami"></div>
 
-  <div class="main">
-    <div class="panel mapbox">
-      <div id="map" role="img" aria-label="Mapa Evropy s univerzitami"></div>
-      <div class="legend" id="legend"></div>
-    </div>
-    <div class="panel">
-      <h2 class="listh">Akce podle termínu</h2>
-      <div class="list" id="list"></div>
+  <div class="ov top">
+    <div class="titlecard">
+      <h1>Erasmus International Weeks 2027</h1>
+      <p class="sub">10 univerzit, 10 zemí · údaje k 13. 11. 2026</p>
+      <div class="chips" role="group" aria-label="Filtr podle typu mobility">
+        <button class="chip" id="f-all" data-f="all" aria-pressed="true">Vše</button>
+        <button class="chip" id="f-teaching" data-f="teaching" aria-pressed="false">Chci učit</button>
+        <button class="chip" id="f-training" data-f="training" aria-pressed="false">Chci se školit</button>
+        <button class="chip" id="f-studying" data-f="studying" aria-pressed="false">Chci studovat</button>
+      </div>
+      <button class="listbtn" id="listbtn" aria-expanded="false" aria-controls="listpanel">☰ Seznam akcí <span id="listcount"></span></button>
     </div>
   </div>
 
-  <section class="panel tl">
+  <aside class="listpanel" id="listpanel" hidden aria-label="Seznam akcí">
+    <div class="lph"><h2 class="listh">Akce podle termínu</h2><button class="x" id="listclose" aria-label="Zavřít seznam">×</button></div>
+    <div class="list" id="list"></div>
+  </aside>
+
+  <div class="legend" id="legend"></div>
+  <a class="scrollhint" href="#casova-osa">Časová osa ↓</a>
+</section>
+
+<div class="wrap">
+  <section class="panel tl" id="casova-osa">
     <h2>Časová osa</h2>
     <div class="tlgrid"><div class="tlinner" id="tl"></div></div>
     <div class="tlleg"><span><i class="dot" style="background:var(--muted);border-radius:3px;width:18px;height:10px"></i>termín akce</span><span><i style="width:10px;height:10px;border:2px solid var(--muted);transform:rotate(45deg)"></i>uzávěrka přihlášek</span><span><i style="width:0;height:12px;border-left:2px solid var(--warn)"></i>dnes</span></div>
@@ -375,7 +391,7 @@ const BASES = {
 function initMap(){
   const el = document.getElementById("map");
   if (!window.L){ el.innerHTML = `<p style="padding:24px;color:var(--muted)">Mapu se nepodařilo načíst. Akce najdete v seznamu a na časové ose.</p>`; return; }
-  map = L.map(el, {zoomControl:true, worldCopyJump:true}).fitBounds([[35,-11],[63.5,31]]);
+  map = L.map(el, {zoomControl:false, worldCopyJump:true}).fitBounds([[35,-11],[63.5,31]]);
   const layers = {}; for (const k in BASES) layers[k] = BASES[k]();
   let start = "Mapa"; try { const s = localStorage.getItem("eiw-base"); if (s && layers[s]) start = s; } catch(e){}
   let current = layers[start].addTo(map);
@@ -390,7 +406,8 @@ function initMap(){
     return box;
   }});
   new Sel().addTo(map);
-  L.control.scale({imperial:false}).addTo(map);
+  L.control.zoom({position:"bottomright"}).addTo(map);
+  L.control.scale({imperial:false, position:"bottomleft"}).addTo(map);
   layerGroup = L.layerGroup().addTo(map);
 }
 function renderMap(){
@@ -430,6 +447,7 @@ function renderTimeline(){
 
 function renderAll(){
   const vis = visible();
+  const lc = document.getElementById("listcount"); if (lc) lc.textContent = `(${vis.length})`;
   if (!vis.some(e=>e.id===selectedId)) selectedId = (vis.find(e=>e.dl>=TODAY) || vis[0] || {}).id || null;
   renderList(); renderMap(); renderTimeline(); applySel();
 }
@@ -439,6 +457,12 @@ document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () =
   renderAll();
 }));
 initMap(); renderLegend(); renderAll();
+const lp = document.getElementById("listpanel"), lb = document.getElementById("listbtn");
+function placePanel(){ if (innerWidth > 700){ const r = document.querySelector(".titlecard").getBoundingClientRect(); lp.style.top = (r.bottom - document.querySelector(".hero").getBoundingClientRect().top + 8) + "px"; } else lp.style.top = ""; }
+function setList(open){ lp.hidden = !open; lb.setAttribute("aria-expanded", String(open)); if (open){ placePanel(); const s=document.querySelector(".ev.on"); if(s) s.scrollIntoView({block:"nearest"}); } }
+lb.addEventListener("click", () => setList(lp.hidden));
+document.getElementById("listclose").addEventListener("click", () => setList(false));
+window.addEventListener("resize", () => { if (!lp.hidden) placePanel(); });
 
 const rethemed = () => renderMap();
 
