@@ -393,13 +393,22 @@ function renderList(){
   });
 }
 let selectedId = null, labels = {};
-const FOCUS_ZOOM = 7;
+const FOCUS_ZOOM = 6; // maximální přiblížení při výběru
 function zoomTo(id){
+  // Přiblíží jen tolik, aby vybraná akce byla uprostřed a byly vidět i její 2 nejbližší sousedé.
   const ll = markers[id].getLatLng();
-  const z = Math.max(map.getZoom(), FOCUS_ZOOM);
+  const others = Object.keys(markers).filter(k => k !== id).map(k => markers[k].getLatLng())
+    .sort((a,b) => ll.distanceTo(a) - ll.distanceTo(b)).slice(0, 2);
+  let z = FOCUS_ZOOM;
+  if (others.length){
+    const pts = [ll];
+    others.forEach(o => { pts.push(o); pts.push(L.latLng(2*ll.lat - o.lat, 2*ll.lng - o.lng)); });
+    z = Math.min(FOCUS_ZOOM, map.getBoundsZoom(L.latLngBounds(pts).pad(0.15)));
+  }
+  z = Math.max(z, 4);
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduce || map.getCenter().distanceTo(ll) < 2000 && map.getZoom() === z) map.setView(ll, z, {animate:!reduce});
-  else map.flyTo(ll, z, {duration:1.2});
+  if (reduce) map.setView(ll, z, {animate:false});
+  else map.flyTo(ll, z, {duration:1.0});
 }
 function applySel(){
   document.querySelectorAll(".ev,.row[data-id]").forEach(x=>x.classList.toggle("on",x.dataset.id===selectedId));
