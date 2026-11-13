@@ -67,7 +67,13 @@ h1{font:700 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
 .tlhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .tlhead h2{margin:0}
 .btn.sm{padding:5px 12px;font-size:13px;background:transparent;cursor:pointer;font-family:inherit}
-body.lp-open .wrap{padding-left:max(20px, 436px)}
+@media (min-width:701px){
+  .ov.top{position:fixed}
+  .fab{display:none!important}
+  body.scrolled .titlecard h1, body.scrolled .titlecard .sub{display:none}
+  body.scrolled .titlecard{max-width:400px}
+  body.scrolled .wrap, body.lp-open .wrap{padding-left:436px;max-width:none;margin:0}
+}
 .listbtn{justify-self:start;font:600 14px var(--body);background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
 .listbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .listpanel{position:fixed;z-index:900;left:12px;top:200px;bottom:16px;width:400px;max-width:calc(100% - 24px);display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
@@ -153,7 +159,6 @@ dialog.dlg::backdrop{background:rgba(10,15,25,.55)}
 .src{font-size:12.5px;word-break:break-all}
 .src a{color:var(--accent)}
 .hide{display:none!important}
-@media (max-width:1100px){body.lp-open .wrap{padding-left:20px}}
 @media (max-width:700px){.fab{top:auto;bottom:16px}.tomap{left:auto;right:16px;transform:none}.ov.top{right:12px}.titlecard{max-width:none}.legend{display:none}.listpanel{left:8px;right:8px;width:auto;top:auto;bottom:56px;height:60%}.scrollhint{bottom:10px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -506,6 +511,8 @@ document.getElementById("tomap2").addEventListener("click", goMap);
 function onScroll(){
   const heroBottom = document.querySelector(".hero").getBoundingClientRect().bottom;
   fab.hidden = heroBottom > 120;
+  const sc = heroBottom < innerHeight * 0.6;
+  if (sc !== document.body.classList.contains("scrolled")){ document.body.classList.toggle("scrolled", sc); if (!lp.hidden) placePanel(); }
   document.getElementById("tomap").hidden = heroBottom > 120;
   if (!lp.hidden) placePanel();
 }
