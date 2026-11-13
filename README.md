@@ -9,4 +9,6 @@ Interaktivní mapa Erasmus+ International Weeks a Staff Weeks na 10 evropských 
 
 Data pocházejí z oficiálních stránek univerzit a databáze IMOTION (staffmobility.eu). U každé akce je uvedený stav ověření. Před přihlášením si uzávěrku ověřte u pořadatele.
 
-Mapové podklady: © OpenStreetMap contributors, Esri World Imagery, OpenTopoMap (CC-BY-SA), © CARTO.
+Mapové podklady: © OpenStreetMap contributors, Esri World Imagery, OpenTopoMap (CC-BY-SA), Esri Light/Dark Gray Canvas.
+
+Volitelně: do konstanty `CARTO_KEY` v `index.html` lze vložit bezplatný klíč z https://carto.com/basemaps/apikey (omezený na doménu webu). Světlá a Tmavá mapa pak použijí podklady CARTO Positron / Dark Matter.

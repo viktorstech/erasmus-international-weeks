@@ -156,7 +156,7 @@ dialog.dlg::backdrop{background:rgba(10,15,25,.55)}
 
   <dialog class="dlg" id="dlg" aria-labelledby="dlg-title"><div id="dlg-body"></div></dialog>
 
-  <footer>Mapové podklady: OpenStreetMap, Esri World Imagery, OpenTopoMap, CARTO. Zdroje dat: oficiální stránky univerzit a databáze IMOTION (staffmobility.eu); detail a ověření ke každé akci je ve vaultu „Erasmus International Weeks“. „Částečně ověřeno“ znamená, že část údajů pochází z IMOTION nebo ze stránky partnerské univerzity. Souřadnice jsou přibližné. Před přihlášením si uzávěrku vždy ověřte u pořadatele.</footer>
+  <footer>Mapové podklady: OpenStreetMap, Esri (World Imagery, Light/Dark Gray Canvas), OpenTopoMap. Zdroje dat: oficiální stránky univerzit a databáze IMOTION (staffmobility.eu); detail a ověření ke každé akci je ve vaultu „Erasmus International Weeks“. „Částečně ověřeno“ znamená, že část údajů pochází z IMOTION nebo ze stránky partnerské univerzity. Souřadnice jsou přibližné. Před přihlášením si uzávěrku vždy ověřte u pořadatele.</footer>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -337,12 +337,21 @@ function renderLegend(){
 }
 
 let map = null, layerGroup = null, markers = {};
+// Volitelné: bezplatný klíč z https://carto.com/basemaps/apikey (omezte ho na doménu viktorstech.github.io).
+// Když zůstane prázdný, Světlá a Tmavá mapa použijí podklady Esri Canvas, které klíč nepotřebují.
+const CARTO_KEY = "";
+const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/";
+const esriCanvas = tone => L.layerGroup([
+  L.tileLayer(ESRI+`World_${tone}_Gray_Base/MapServer/tile/{z}/{y}/{x}`,{maxZoom:16,attribution:"Tiles &copy; Esri, HERE, Garmin, &copy; OpenStreetMap contributors"}),
+  L.tileLayer(ESRI+`World_${tone}_Gray_Reference/MapServer/tile/{z}/{y}/{x}`,{maxZoom:16})
+]);
+const carto = style => L.tileLayer(`https://basemaps.cartocdn.com/rastertiles/${style}/{z}/{x}/{y}.png?key=${CARTO_KEY}`,{maxZoom:19,attribution:'&copy; OpenStreetMap &copy; <a href="https://carto.com/attributions">CARTO</a>'});
 const BASES = {
   "Mapa": () => L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}),
   "Satelit": () => L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:'Tiles &copy; Esri, Maxar, Earthstar Geographics'}),
   "Terén": () => L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:'&copy; OpenStreetMap, SRTM | &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'}),
-  "Světlá": () => L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{maxZoom:19,subdomains:"abcd",attribution:'&copy; OpenStreetMap &copy; <a href="https://carto.com/attributions">CARTO</a>'}),
-  "Tmavá": () => L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19,subdomains:"abcd",attribution:'&copy; OpenStreetMap &copy; <a href="https://carto.com/attributions">CARTO</a>'})
+  "Světlá": () => CARTO_KEY ? carto("light_all") : esriCanvas("Light"),
+  "Tmavá": () => CARTO_KEY ? carto("dark_all") : esriCanvas("Dark")
 };
 function initMap(){
   const el = document.getElementById("map");
